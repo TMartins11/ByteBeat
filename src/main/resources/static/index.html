@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Book Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Inter", sans-serif;
+            background: linear-gradient(135deg, #1a6dd8, #bfe4ff);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: #ffffffdd;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .book-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr 120px 150px;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .book-row:last-child {
+            border-bottom: none;
+        }
+
+        img.book-img {
+            width: 90px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #e63946;
+        }
+
+        .update-btn {
+            background: #1d5ef5;
+        }
+
+        .add-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 120px 150px;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+
+        .add-btn {
+            background: #0a7cff;
+        }
+
+        /* MODAL UPDATE */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .close-modal {
+            background: #555;
+        }
+
+    </style>
+</head>
+<body>
+
+<h1>Book Manager</h1>
+
+<div class="container">
+
+    <!-- ADD NEW BOOK -->
+    <div class="add-form">
+        <input id="new-title" placeholder="Title">
+        <input id="new-author" placeholder="Author">
+        <input id="new-image" placeholder="Image URL (.jpg)">
+        <input id="new-price" placeholder="Price" type="number" step="0.01">
+        <button class="add-btn" onclick="addBook()">Add Book</button>
+    </div>
+
+    <!-- LIST OF BOOKS -->
+    <div id="book-list"></div>
+
+</div>
+
+<!-- UPDATE MODAL -->
+<div class="modal" id="update-modal">
+    <div class="modal-content">
+        <h3>Update Book</h3>
+        <input id="upd-title" placeholder="Title">
+        <input id="upd-author" placeholder="Author">
+        <input id="upd-image" placeholder="Image URL (.jpg)">
+        <input id="upd-price" placeholder="Price" type="number" step="0.01">
+        <button class="update-btn" onclick="confirmUpdate()">Save</button>
+        <button class="close-modal" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<script>
+    const API = "http://localhost:8080/books";
+    let updateId = null;
+
+    async function loadBooks() {
+        const res = await fetch(API);
+        const books = await res.json();
+
+        const list = document.getElementById("book-list");
+        list.innerHTML = "";
+
+        books.forEach(book => {
+            const row = document.createElement("div");
+            row.className = "book-row";
+
+            row.innerHTML = `
+                <img class="book-img" src="${book.image ?? ''}"
+                     onerror="this.src='https://via.placeholder.com/90x120.jpg?text=No+Image'">
+
+                <div><b>${book.title}</b></div>
+                <div>${book.author}</div>
+                <div><b>$${Number(book.price).toFixed(2)}</b></div>
+
+                <div>
+                    <button class="update-btn" onclick='openUpdate(${book.id})'>Update</button>
+                    <button class="delete-btn" onclick="deleteBook(${book.id})">Delete</button>
+                </div>
+            `;
+
+            row.dataset.book = JSON.stringify(book);
+            list.appendChild(row);
+        });
+    }
+
+    async function addBook() {
+        const title = document.getElementById("new-title").value;
+        const author = document.getElementById("new-author").value;
+        const image = document.getElementById("new-image").value;
+        const price = document.getElementById("new-price").value;
+
+        if (!title || !author || !image || !price) {
+            alert("Fill all fields.");
+            return;
+        }
+
+        await fetch(API, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ title, author, image, price })
+        });
+
+        loadBooks();
+    }
+
+    async function deleteBook(id) {
+        await fetch(`${API}/${id}`, {
+            method: "DELETE",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ id })
+        });
+
+        loadBooks();
+    }
+
+    function openUpdate(id) {
+        const row = [...document.querySelectorAll(".book-row")]
+            .find(r => JSON.parse(r.dataset.book).id === id);
+
+        const book = JSON.parse(row.dataset.book);
+
+        updateId = id;
+
+        document.getElementById("upd-title").value = book.title;
+        document.getElementById("upd-author").value = book.author;
+        document.getElementById("upd-image").value = book.image;
+        document.getElementById("upd-price").value = book.price;
+
+        document.getElementById("update-modal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("update-modal").style.display = "none";
+    }
+
+    async function confirmUpdate() {
+        const title = document.getElementById("upd-title").value;
+        const author = document.getElementById("upd-author").value;
+        const image = document.getElementById("upd-image").value;
+        const price = document.getElementById("upd-price").value;
+
+        await fetch(`${API}/${updateId}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ id: updateId, title, author, image, price })
+        });
+
+        closeModal();
+        loadBooks();
+    }
+
+    loadBooks();
+</script>
+
+</body>
+</html>
