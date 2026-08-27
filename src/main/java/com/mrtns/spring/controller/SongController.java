@@ -56,4 +56,18 @@ public class SongController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/songs/search")
+    public List<Song> search(@RequestParam(required = false) String artist, @RequestParam(required = false) String title,
+                             @RequestParam(required = false) String genre){
+        List <Song> allSongs = songRepository.findAll();
+
+        List<Song> result = allSongs.stream()
+                .filter(song -> artist == null || song.getArtist().equals(artist))
+                .filter(song -> title  == null || song.getTitle().contains(title))
+                .filter(song -> genre  == null || song.getGenre().equals(genre))
+                .toList();
+
+        return result;
+    }
+
 }
