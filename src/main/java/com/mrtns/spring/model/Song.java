@@ -1,10 +1,11 @@
 package com.mrtns.spring.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Song {
@@ -22,6 +23,10 @@ public class Song {
     private Integer releaseYear;
     private String coverUrl;
 
+    @ManyToMany(mappedBy = "favoriteSongs")
+    @JsonIgnore
+    private List<User> favoritedBy = new ArrayList<>();
+
     public Song(Integer id) {
         super();
         this.id = id;
@@ -31,18 +36,7 @@ public class Song {
         super();
     }
 
-    @Override
-    public String toString() {
-        return "Song{" +
-                "id=" + id +
-                ", title=" + title + '\'' +
-                ", artist=" + artist + '\'' +
-                ", album=" + album +
-                ", genre=" + genre + '\'' +
-                ", release year=" + releaseYear + '\''+
-                ", coverUrl=" + coverUrl + '\'' +
-                '}';
-    }
+
 
     public Integer getId(){
         return id;
@@ -98,5 +92,39 @@ public class Song {
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
+    }
+
+    public List<User> getFavoritedBy() {
+        return favoritedBy;
+    }
+
+    public void setFavoritedBy(List<User> favoritedBy) {
+        this.favoritedBy = favoritedBy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Song)) return false;
+        Song song = (Song) o;
+        return id != null && id.equals(song.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Song{" +
+                "id=" + id +
+                ", title=" + title + '\'' +
+                ", artist=" + artist + '\'' +
+                ", album=" + album +
+                ", genre=" + genre + '\'' +
+                ", release year=" + releaseYear + '\''+
+                ", coverUrl=" + coverUrl + '\'' +
+                '}';
     }
 }

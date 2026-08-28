@@ -30,8 +30,8 @@ public class SongService {
     public Optional<Song> updateSong(Integer id, Song song){
         if(songRepository.existsById(id)){
             song.setId(id);
-            Song saved = songRepository.save(song);
-            return Optional.of(saved);
+            Song updated = songRepository.save(song);
+            return Optional.of(updated);
         }
         return Optional.empty();
     }

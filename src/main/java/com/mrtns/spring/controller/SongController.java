@@ -51,5 +51,4 @@ public class SongController {
                              @RequestParam(required = false) String genre){
         return songService.search(artist,title,genre);
     }
-
 }
