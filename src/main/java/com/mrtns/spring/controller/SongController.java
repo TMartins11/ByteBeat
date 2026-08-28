@@ -1,7 +1,7 @@
 package com.mrtns.spring.controller;
 
 import com.mrtns.spring.model.Song;
-import com.mrtns.spring.repository.SongRepository;
+import com.mrtns.spring.service.SongService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,60 +14,42 @@ import java.util.Optional;
 public class SongController {
 
     @Autowired
-    SongRepository songRepository;
+    private SongService songService;
 
     @PostMapping("/songs")
     public Song createSong(@Valid @RequestBody Song song){
-        return songRepository.save(song);
+        return songService.createSong(song);
     }
 
     @GetMapping("/songs")
     public List<Song> retrieveAllSongs(){
-        return songRepository.findAll();
+        return songService.retrieveAllSongs();
     }
 
     @GetMapping("/songs/{id}")
     public ResponseEntity<Song> getSong(@PathVariable Integer id){
-        Optional<Song> result = songRepository.findById(id);
-
-        if(result.isPresent()){
-            return ResponseEntity.ok(result.get());
-        }
-
-        return ResponseEntity.notFound().build();
+        Optional<Song> result = songService.getSong(id);
+        return result.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/songs/{id}")
     public ResponseEntity<?> updateSong(@PathVariable Integer id, @Valid @RequestBody Song song){
-        if(songRepository.existsById(id)){
-            song.setId(id);
-            return ResponseEntity.ok(songRepository.save(song));
-        }
-        return ResponseEntity.notFound().build();
+        Optional<Song> updated = songService.updateSong(id,song);
+        return updated.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/songs/{id}")
     public ResponseEntity<?> deleteSong(@PathVariable Integer id){
-        if(songRepository.existsById(id)){
-            songRepository.deleteById(id);
+        if(songService.deleteSong(id)){
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/songs/search")
     public List<Song> search(@RequestParam(required = false) String artist, @RequestParam(required = false) String title,
                              @RequestParam(required = false) String genre){
-        List <Song> allSongs = songRepository.findAll();
-
-        List<Song> result = allSongs.stream()
-                .filter(song -> artist == null || song.getArtist().equals(artist))
-                .filter(song -> title  == null || song.getTitle().contains(title))
-                .filter(song -> genre  == null || song.getGenre().equals(genre))
-                .toList();
-
-        return result;
+        return songService.search(artist,title,genre);
     }
 
 }
