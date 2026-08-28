@@ -54,6 +54,10 @@ public class UserService {
         Song song = songRepository.findById(songId)
                 .orElseThrow(() -> new ResourceNotFoundException("Música não encontrada"));
 
+        if(user.getFavoriteSongs().contains(song)){
+            return user;
+        }
+
         user.getFavoriteSongs().add(song);
         return userRepository.save(user);
     }
