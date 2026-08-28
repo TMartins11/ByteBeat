@@ -1,5 +1,6 @@
 package com.mrtns.spring.controller;
 
+import com.mrtns.spring.model.Song;
 import com.mrtns.spring.model.User;
 import com.mrtns.spring.service.UserService;
 import jakarta.validation.Valid;
@@ -56,5 +57,11 @@ public class UserController {
     public ResponseEntity<User> deleteFavorite(@PathVariable Integer userId, @PathVariable Integer songId){
         userService.deleteFavorite(userId,songId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/users/{userId}/recommendations")
+    public ResponseEntity<List<Song>> getRecommendations(@PathVariable Integer userId){
+        List<Song> recommendations = userService.getRecommendations(userId);
+        return ResponseEntity.ok(recommendations);
     }
 }

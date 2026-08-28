@@ -8,9 +8,7 @@ import com.mrtns.spring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -60,7 +58,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User deleteFavorite(Integer userId, Integer songId){
+    public void deleteFavorite(Integer userId, Integer songId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
@@ -68,6 +66,23 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Música não encontrada"));
 
         user.getFavoriteSongs().remove(song);
-        return userRepository.save(user);
+        userRepository.save(user);
+    }
+
+    public List<Song> getRecommendations(Integer userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
+        Set<String> genres = new HashSet<>();
+        for (Song song : user.getFavoriteSongs()) {
+            genres.add(song.getGenre());
+        }
+
+        List<Integer> alreadyFavorites = new ArrayList<Integer>();
+        for(Song song : user.getFavoriteSongs() ){
+            alreadyFavorites.add(song.getId());
+        }
+
+        return songRepository.findByGenreInAndIdNotIn(genres, alreadyFavorites);
     }
 }
