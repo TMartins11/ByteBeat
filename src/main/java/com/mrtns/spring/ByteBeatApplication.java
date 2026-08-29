@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CrudRestJpaDemoApplication {
+public class ByteBeatApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CrudRestJpaDemoApplication.class, args);
+        SpringApplication.run(ByteBeatApplication.class, args);
     }
 
 }

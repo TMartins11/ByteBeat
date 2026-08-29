@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.mrtns.spring</groupId>
-    <artifactId>App</artifactId>
+    <artifactId>bytebeat</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>CrudRestJPADemo</name>
-    <description>CrudRestJPADemo</description>
+    <name>ByteBeat</name>
+    <description>API REST de catálogo musical, favoritos e recomendação</description>
     <url/>
     <licenses>
         <license/>
