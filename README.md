@@ -2,7 +2,7 @@
 
 **API REST de catálogo musical, favoritos e recomendação por gênero.**
 
-*Spring Boot · Spring Data JPA · MySQL · Bean Validation · springdoc-openapi*
+*Spring Boot · Spring Data JPA · MySQL · Bean Validation · springdoc-openapi · Docker · JUnit/Mockito*
 
 ---
 
@@ -13,7 +13,7 @@ que usuários favoritem faixas e receber recomendações simples baseadas nos
 gêneros que já favoritaram. O projeto nasceu como exercício de fundamentos
 de Spring Boot e evoluiu para uma arquitetura em camadas (Controller →
 Service → Repository), com validação de entrada, tratamento de erros
-centralizado e um front-end estático simples para demonstração.
+centralizado, testes unitários e execução via Docker.
 
 ## Tecnologias
 
@@ -24,6 +24,8 @@ centralizado e um front-end estático simples para demonstração.
 | Persistência | Spring Data JPA / Hibernate |
 | Banco de dados | MySQL |
 | Validação | Bean Validation (Jakarta) |
+| Testes | JUnit 5 + Mockito |
+| Containerização | Docker / Docker Compose |
 | Documentação | springdoc-openapi (Swagger UI) |
 | Build | Maven |
 
@@ -38,20 +40,33 @@ Controller  ->  Service  ->  Repository  ->  MySQL
 
 Erros de validação (`400`) e recursos não encontrados (`404`) são tratados
 de forma centralizada por um `@RestControllerAdvice`, retornando um JSON
-enxuto em vez da resposta padrão verbosa do Spring.
+enxuto em vez da resposta padrão verbosa do Spring. A camada `Service`
+(onde vive toda a lógica de negócio) é coberta por testes unitários com
+JUnit e Mockito, isolados de banco de dados real.
 
-## Como rodar localmente
+## Como rodar
 
-### Pré-requisitos
+### Opção 1 — Docker (recomendado)
 
+Não exige Java, Maven ou MySQL instalados — só Docker.
+
+1. Crie um arquivo `.env` defina a variável `DB_PASSWORD` e escolha sua senha.
+2. Rode:
+   ```bash
+   docker compose up --build
+   ```
+
+A aplicação sobe em `http://localhost:8080`, com um MySQL próprio criado
+automaticamente dentro de um container (banco começa vazio).
+
+### Opção 2 — Local (Maven + MySQL manual)
+
+#### Pré-requisitos
 - Java 17+
 - MySQL rodando localmente, com um schema chamado `music_store` criado
 - Maven (ou use o wrapper `./mvnw` incluído no projeto)
 
-### Configuração
-
-O projeto lê a senha do banco a partir de uma variável de ambiente — nunca
-hardcoded:
+#### Configuração
 
 ```bash
 # Linux / macOS
@@ -66,7 +81,7 @@ $env:DB_PASSWORD="sua_senha_aqui"
 No IntelliJ, configure o mesmo valor em *Run Configurations → Environment
 variables*.
 
-### Executando
+#### Executando
 
 ```bash
 ./mvnw spring-boot:run
@@ -75,6 +90,12 @@ variables*.
 A aplicação sobe em `http://localhost:8080`. A landing page está em
 `http://localhost:8080/index.html`, e a documentação interativa da API em
 `http://localhost:8080/swagger-ui/index.html`.
+
+### Rodando os testes
+
+```bash
+./mvnw test
+```
 
 ## Endpoints
 
@@ -133,8 +154,9 @@ Song                      User
 - [x] Busca combinável por artista, título e gênero
 - [x] Arquitetura em camadas (Service)
 - [x] Usuários, favoritos e recomendação por gênero
-- [ ] Integração com IA para recomendação
-- [ ] Testes automatizados mais abrangentes
+- [x] Testes unitários (JUnit + Mockito)
+- [x] Containerização com Docker
+- [ ] Integração com IA para sugestões fora do catálogo
 
 ---
 
