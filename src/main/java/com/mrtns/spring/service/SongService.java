@@ -44,7 +44,7 @@ public class SongService {
     }
 
     public List<Song> search(String artist, String title, String genre){
-        List <Song> allSongs = songRepository.findAll();
+        List<Song> allSongs = songRepository.findAll();
 
         List<Song> result = allSongs.stream()
                 .filter(song -> artist == null || song.getArtist().equals(artist))
