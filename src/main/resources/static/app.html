@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByteBeat</title>
+
+    <!-- Favicon SVG Integrado -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%2300f2fe' d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/></svg>">
+
+    <!-- Fonte JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #08090d;
+            --bg-gradient: radial-gradient(ellipse at 50% 0%, rgba(127, 0, 255, 0.12) 0%, rgba(8, 9, 13, 0) 75%);
+            --card-bg: rgba(18, 22, 31, 0.55);
+            --card-border: rgba(255, 255, 255, 0.08);
+
+            --accent-cyan: #00f2fe;
+            --accent-purple: #7f00ff;
+            --accent-pink: #ff007f;
+
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            --danger: #ff4757;
+            --success: #2ed573;
+
+            --radius-lg: 14px;
+            --radius-md: 8px;
+            --shadow-glow: 0 15px 35px -10px rgba(127, 0, 255, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: rgba(8, 9, 13, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 70%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: transform 0.2s ease;
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .brand-icon svg {
+            fill: url(#brand-grad);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.3rem;
+            border-radius: 30px;
+            border: 1px solid var(--card-border);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.6rem 1.4rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn:hover { color: var(--text-main); }
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        main {
+            max-width: 1280px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: rgba(18, 22, 31, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-left: 3px solid var(--accent-purple);
+            color: var(--text-main);
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            min-width: 250px;
+            animation: toastIn 0.35s ease forwards;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--accent-cyan); }
+
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .search-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .form-group label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            background: rgba(8, 9, 13, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 0.85rem;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            outline: none;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.65rem 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 20px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-primary { background: #fff; color: #08090d; }
+        .btn-primary:hover { background: #f1f5f9; transform: translateY(-1px); }
+
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border-color: var(--card-border); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .btn-danger { background: rgba(255, 71, 87, 0.1); color: #ff6b81; border-color: rgba(255, 71, 87, 0.2); }
+        .btn-danger:hover { background: var(--danger); color: white; }
+
+        .btn-pink {
+            background: rgba(255, 0, 127, 0.1);
+            color: var(--accent-pink);
+            border-color: rgba(255, 0, 127, 0.25);
+        }
+        .btn-pink:hover {
+            background: var(--accent-pink);
+            color: #fff;
+        }
+
+        .btn-recommend {
+            background: rgba(0, 242, 254, 0.08);
+            color: var(--accent-cyan);
+            border-color: rgba(0, 242, 254, 0.2);
+            width: 100%;
+        }
+        .btn-recommend:hover {
+            background: var(--accent-cyan);
+            color: #08090d;
+        }
+
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
+
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .song-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: cardFade 0.4s ease forwards;
+        }
+
+        @keyframes cardFade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .song-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .cover-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            background: #000;
+        }
+
+        .cover-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.9);
+            transition: transform 0.4s ease;
+        }
+
+        .song-card:hover .cover-img { transform: scale(1.05); filter: brightness(1); }
+
+        .genre-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(8, 9, 13, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .song-info {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin-bottom: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .song-actions {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.75rem;
+        }
+
+        /* Modal Expandido */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: #12161f;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 480px;
+            padding: 1.5rem;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-content.modal-large {
+            max-width: 720px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-title { font-size: 1.2rem; font-weight: 700; }
+        .modal-close { background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .user-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+        }
+
+        .user-info-box {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .favorites-box {
+            background: rgba(8, 9, 13, 0.5);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .fav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .fav-item {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.75rem; padding: 0.4rem 0.6rem;
+            background: rgba(255, 255, 255, 0.03); border-radius: 6px;
+            gap: 0.5rem;
+        }
+
+        /* Formulário de Adicionar Favorito Organizado para Evitar Overflow */
+        .fav-add-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+        }
+
+        .fav-add-form select {
+            width: 100%;
+            font-size: 0.75rem;
+        }
+
+        .recommendation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .rec-card {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            transition: border-color 0.2s ease;
+        }
+
+        .rec-card:hover {
+            border-color: rgba(0, 242, 254, 0.3);
+        }
+
+        .rec-thumb {
+            width: 54px;
+            height: 54px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #000;
+            flex-shrink: 0;
+        }
+
+        .rec-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .rec-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rec-artist {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .empty-msg { font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1rem 0; }
+    </style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute;">
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ffffff" />
+        <stop offset="50%" stop-color="#00f2fe" />
+        <stop offset="100%" stop-color="#7f00ff" />
+    </linearGradient>
+</svg>
+
+<header>
+    <div class="nav-container">
+        <a href="index.html" class="brand-logo">
+            <div class="brand-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+            </div>
+            ByteBeat
+        </a>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('songs-view', event)">Acervo</button>
+            <button class="tab-btn" onclick="switchTab('users-view', event)">Comunidade</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div id="toast-container"></div>
+
+    <section id="songs-view" class="view-section active">
+        <div class="section-header">
+            <h2 class="section-title">Coleção Geral</h2>
+            <button class="btn btn-primary btn-sm" onclick="openSongModal()">+ Adicionar Música</button>
+        </div>
+
+        <div class="search-card">
+            <div class="search-grid">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="search-title" class="form-control" placeholder="Buscar por faixa...">
+                </div>
+                <div class="form-group">
+                    <label>Artista</label>
+                    <input type="text" id="search-artist" class="form-control" placeholder="Buscar artista...">
+                </div>
+                <div class="form-group">
+                    <label>Gênero</label>
+                    <input type="text" id="search-genre" class="form-control" placeholder="Ex: Synthwave">
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="handleSearch()">Filtrar</button>
+                    <button class="btn btn-secondary" onclick="clearSearch()">Limpar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="songs-list" class="music-grid"></div>
+    </section>
+
+    <section id="users-view" class="view-section">
+        <div class="section-header">
+            <h2 class="section-title">Membros</h2>
+            <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Criar Perfil</button>
+        </div>
+
+        <div id="users-list" class="users-grid"></div>
+    </section>
+</main>
+
+<!-- Modal Música -->
+<div id="song-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="song-modal-title" class="modal-title">Nova Música</h3>
+            <button class="modal-close" onclick="closeSongModal()">&times;</button>
+        </div>
+        <form id="song-form" onsubmit="saveSong(event)">
+            <input type="hidden" id="song-id">
+            <div style="display:flex; flex-direction:column; gap:0.8rem;">
+                <div class="form-group">
+                    <label>Título *</label>
+                    <input type="text" id="song-title-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Artista *</label>
+                    <input type="text" id="song-artist-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Álbum</label>
+                    <input type="text" id="song-album-input" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Gênero</label>
+                    <input type="text" id="song-genre-input" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Ano de Lançamento</label>
+                    <input type="number" id="song-year-input" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>URL da Capa</label>
+                    <input type="url" id="song-cover-input" class="form-control" placeholder="https://...">
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeSongModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Usuário -->
+<div id="user-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Novo Perfil</h3>
+            <button class="modal-close" onclick="closeUserModal()">&times;</button>
+        </div>
+        <form id="user-form" onsubmit="saveUser(event)">
+            <div style="display:flex; flex-direction:column; gap:0.8rem;">
+                <div class="form-group">
+                    <label>Nome *</label>
+                    <input type="text" id="user-name-input" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail *</label>
+                    <input type="email" id="user-email-input" class="form-control" required>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.25rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Criar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Recomendações -->
+<div id="recommendations-modal" class="modal-overlay">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3 class="modal-title">Recomendações Personalizadas</h3>
+            <button class="modal-close" onclick="closeRecommendationsModal()">&times;</button>
+        </div>
+        <div id="recommendations-content"></div>
+    </div>
+</div>
+
+<script>
+    const API_URL = '';
+
+    const DEFAULT_COVER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%2312161f"/><path d="M150 100v100m-20-20l20 20 20-20" stroke="%2364748b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="150" cy="150" r="80" stroke="%23222d3d" stroke-width="8" fill="none"/></svg>`;
+
+    let state = { songs: [], users: [] };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSongs();
+        loadUsers();
+    });
+
+    function switchTab(tabId, event) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+
+        if(event && event.currentTarget) event.currentTarget.classList.add('active');
+
+        const targetSection = document.getElementById(tabId);
+        targetSection.classList.add('active');
+
+        if (tabId === 'songs-view') loadSongs();
+        if (tabId === 'users-view') loadUsers();
+    }
+
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerText = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    function getSongCover(song) {
+        return song.coverUrl || song.cover_url || song.imageUrl || song.url || song.image || null;
+    }
+
+    /* ================= SOGNS MANAGEMENT ================= */
+
+    async function loadSongs() {
+        try {
+            const res = await fetch(`${API_URL}/songs`);
+            if (res.ok) {
+                state.songs = await res.json();
+                renderSongs(state.songs);
+            }
+        } catch (err) {
+            showToast('Erro ao carregar acervo', 'error');
+        }
+    }
+
+    function renderSongs(songs) {
+        const container = document.getElementById('songs-list');
+        if (!songs || songs.length === 0) {
+            container.innerHTML = '<div class="empty-msg" style="grid-column: 1/-1;">Sem registros encontrados.</div>';
+            return;
+        }
+
+        container.innerHTML = songs.map((song, index) => {
+            const cover = getSongCover(song) || DEFAULT_COVER;
+            return `
+            <div class="song-card" style="animation-delay: ${index * 0.03}s">
+              <div class="cover-wrapper">
+                <img src="${cover}" class="cover-img" alt="${song.title}" onerror="this.src='${DEFAULT_COVER}'">
+                ${song.genre ? `<span class="genre-badge">${song.genre}</span>` : ''}
+              </div>
+              <div class="song-info">
+                <div class="song-title" title="${song.title}">${song.title}</div>
+                <div class="song-artist">${song.artist}</div>
+                <div class="song-meta">
+                  <span>${song.album || 'N/A'}</span>
+                  <span>${song.releaseYear || ''}</span>
+                </div>
+                <div class="song-actions">
+                  <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="editSong(${song.id})">Editar</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteSong(${song.id})">✕</button>
+                </div>
+              </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    async function handleSearch() {
+        const title = document.getElementById('search-title').value.trim();
+        const artist = document.getElementById('search-artist').value.trim();
+        const genre = document.getElementById('search-genre').value.trim();
+
+        const params = new URLSearchParams();
+        if (title) params.append('title', title);
+        if (artist) params.append('artist', artist);
+        if (genre) params.append('genre', genre);
+
+        try {
+            const res = await fetch(`${API_URL}/songs/search?${params.toString()}`);
+            if (res.ok) {
+                renderSongs(await res.json());
+            }
+        } catch (e) {
+            showToast('Erro ao realizar busca', 'error');
+        }
+    }
+
+    function clearSearch() {
+        document.getElementById('search-title').value = '';
+        document.getElementById('search-artist').value = '';
+        document.getElementById('search-genre').value = '';
+        loadSongs();
+    }
+
+    function openSongModal(song = null) {
+        const modal = document.getElementById('song-modal');
+        const form = document.getElementById('song-form');
+        form.reset();
+
+        if (song) {
+            document.getElementById('song-modal-title').innerText = 'Editar Registro';
+            document.getElementById('song-id').value = song.id;
+            document.getElementById('song-title-input').value = song.title || '';
+            document.getElementById('song-artist-input').value = song.artist || '';
+            document.getElementById('song-album-input').value = song.album || '';
+            document.getElementById('song-genre-input').value = song.genre || '';
+            document.getElementById('song-year-input').value = song.releaseYear || '';
+            document.getElementById('song-cover-input').value = getSongCover(song) || '';
+        } else {
+            document.getElementById('song-modal-title').innerText = 'Nova Música';
+            document.getElementById('song-id').value = '';
+        }
+        modal.classList.add('open');
+    }
+
+    function closeSongModal() {
+        document.getElementById('song-modal').classList.remove('open');
+    }
+
+    async function saveSong(e) {
+        e.preventDefault();
+        const id = document.getElementById('song-id').value;
+        const payload = {
+            title: document.getElementById('song-title-input').value,
+            artist: document.getElementById('song-artist-input').value,
+            album: document.getElementById('song-album-input').value,
+            genre: document.getElementById('song-genre-input').value,
+            releaseYear: parseInt(document.getElementById('song-year-input').value) || null,
+            coverUrl: document.getElementById('song-cover-input').value || null
+        };
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/songs/${id}` : `${API_URL}/songs`;
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                showToast(`Registro salvo com sucesso`, 'success');
+                closeSongModal();
+                loadSongs();
+            }
+        } catch (err) {
+            showToast('Erro ao salvar registro', 'error');
+        }
+    }
+
+    function editSong(id) {
+        const song = state.songs.find(s => s.id === id);
+        if (song) openSongModal(song);
+    }
+
+    async function deleteSong(id) {
+        if (!confirm('Remover esta faixa?')) return;
+        try {
+            const res = await fetch(`${API_URL}/songs/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Faixa removida', 'success');
+                loadSongs();
+            }
+        } catch (err) {
+            showToast('Erro ao remover', 'error');
+        }
+    }
+
+    /* ================= USERS MANAGEMENT ================= */
+
+    async function loadUsers() {
+        try {
+            // Garante que o acervo esteja atualizado para popular o select de favoritos
+            const resSongs = await fetch(`${API_URL}/songs`);
+            if(resSongs.ok) state.songs = await resSongs.json();
+
+            const res = await fetch(`${API_URL}/users`);
+            if (res.ok) {
+                state.users = await res.json();
+                renderUsers(state.users);
+            }
+        } catch (err) {
+            showToast('Erro ao carregar usuários', 'error');
+        }
+    }
+
+    function renderUsers(users) {
+        const container = document.getElementById('users-list');
+        if (!users || users.length === 0) {
+            container.innerHTML = '<div class="empty-msg" style="grid-column: 1/-1;">Sem perfis cadastrados.</div>';
+            return;
+        }
+
+        container.innerHTML = users.map(user => {
+            const favorites = user.favorites || user.favoriteSongs || [];
+
+            // Opções do Select de Músicas
+            const songOptions = state.songs.length > 0
+                ? state.songs.map(s => `<option value="${s.id}">${s.title} - ${s.artist}</option>`).join('')
+                : '<option value="">Sem faixas disponíveis</option>';
+
+            return `
+            <div class="user-card">
+              <div class="user-header">
+                <div class="user-info-box">
+                  <div class="user-avatar">${(user.name || 'U').substring(0, 2).toUpperCase()}</div>
+                  <div style="overflow:hidden;">
+                    <div style="font-weight:700; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.name}</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${user.email}</div>
+                  </div>
+                </div>
+                <button class="btn btn-danger btn-sm" style="padding: 0.3rem 0.6rem;" title="Excluir Perfil" onclick="deleteUser(${user.id})">✕</button>
+              </div>
+
+              <div class="favorites-box">
+                <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Músicas Favoritas (${favorites.length})</div>
+                <ul class="fav-list">
+                  ${favorites.length > 0 ? favorites.map(f => `
+                    <li class="fav-item">
+                      <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${f.title} - ${f.artist}</span>
+                      <button class="btn btn-danger btn-sm" style="padding:0.1rem 0.4rem; font-size:0.65rem;" onclick="removeFavorite(${user.id}, ${f.id})">✕</button>
+                    </li>
+                  `).join('') : '<div class="empty-msg" style="padding:0.4rem 0;">Nenhum favorito.</div>'}
+                </ul>
+
+                <form class="fav-add-form" onsubmit="addFavorite(event, ${user.id})">
+                  <select id="fav-select-${user.id}" class="form-control" required>
+                    <option value="">Selecione uma faixa...</option>
+                    ${songOptions}
+                  </select>
+                  <button type="submit" class="btn btn-pink btn-sm" style="width:100%;">+ Favoritar Música</button>
+                </form>
+              </div>
+
+              <button class="btn btn-recommend btn-sm" onclick="showRecommendations(${user.id})">✦ Ver Recomendações</button>
+            </div>
+            `;
+        }).join('');
+    }
+
+    function openUserModal() {
+        document.getElementById('user-form').reset();
+        document.getElementById('user-modal').classList.add('open');
+    }
+
+    function closeUserModal() {
+        document.getElementById('user-modal').classList.remove('open');
+    }
+
+    async function saveUser(e) {
+        e.preventDefault();
+        const payload = {
+            name: document.getElementById('user-name-input').value,
+            email: document.getElementById('user-email-input').value
+        };
+
+        try {
+            const res = await fetch(`${API_URL}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                showToast('Perfil criado com sucesso', 'success');
+                closeUserModal();
+                loadUsers();
+            }
+        } catch (err) {
+            showToast('Erro ao criar perfil', 'error');
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm('Deseja realmente excluir este perfil?')) return;
+        try {
+            const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Perfil excluído com sucesso', 'success');
+                loadUsers();
+            } else {
+                showToast('Não foi possível excluir o perfil', 'error');
+            }
+        } catch (err) {
+            showToast('Erro ao conectar ao servidor', 'error');
+        }
+    }
+
+    /* ================= FAVORITES & RECOMMENDATIONS ================= */
+
+    async function addFavorite(e, userId) {
+        e.preventDefault();
+        const select = document.getElementById(`fav-select-${userId}`);
+        const songId = select.value;
+        if (!songId) return;
+
+        try {
+            const res = await fetch(`${API_URL}/users/${userId}/favorites/${songId}`, {
+                method: 'POST'
+            });
+
+            if (res.ok) {
+                showToast('Música adicionada aos favoritos', 'success');
+                loadUsers();
+            } else {
+                showToast('Erro ao favoritar música', 'error');
+            }
+        } catch (err) {
+            showToast('Erro na requisição', 'error');
+        }
+    }
+
+    async function removeFavorite(userId, songId) {
+        try {
+            const res = await fetch(`${API_URL}/users/${userId}/favorites/${songId}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                showToast('Favorito removido', 'info');
+                loadUsers();
+            }
+        } catch (err) {
+            showToast('Erro ao remover favorito', 'error');
+        }
+    }
+
+    async function showRecommendations(userId) {
+        const modal = document.getElementById('recommendations-modal');
+        const container = document.getElementById('recommendations-content');
+        container.innerHTML = '<div class="empty-msg">Carregando recomendações...</div>';
+        modal.classList.add('open');
+
+        try {
+            const res = await fetch(`${API_URL}/users/${userId}/recommendations`);
+            if (res.ok) {
+                const recommendations = await res.json();
+                if (!recommendations || recommendations.length === 0) {
+                    container.innerHTML = '<div class="empty-msg">Nenhuma recomendação disponível no momento. Favorite mais músicas para ter sugestões!</div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                <div class="recommendation-grid">
+                  ${recommendations.map(song => {
+                    const cover = getSongCover(song) || DEFAULT_COVER;
+                    return `
+                      <div class="rec-card">
+                        <img src="${cover}" class="rec-thumb" alt="${song.title}" onerror="this.src='${DEFAULT_COVER}'">
+                        <div class="rec-info">
+                          <div class="rec-title">${song.title}</div>
+                          <div class="rec-artist">${song.artist}</div>
+                        </div>
+                      </div>
+                    `;
+                }).join('')}
+                </div>
+                `;
+            } else {
+                container.innerHTML = '<div class="empty-msg">Erro ao carregar recomendações.</div>';
+            }
+        } catch (err) {
+            container.innerHTML = '<div class="empty-msg">Erro de conexão ao carregar recomendações.</div>';
+        }
+    }
+
+    function closeRecommendationsModal() {
+        document.getElementById('recommendations-modal').classList.remove('open');
+    }
+</script>
+</body>
+</html>
