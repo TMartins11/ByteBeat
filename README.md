@@ -4,6 +4,8 @@
 
 *Spring Boot · Spring Data JPA · MySQL · Bean Validation · springdoc-openapi · Docker · JUnit/Mockito*
 
+![ByteBeat — Landing Page](docs/screenshots/landing.png)
+
 ---
 
 ## Sobre o projeto
@@ -100,6 +102,10 @@ A aplicação sobe em `http://localhost:8080`. A landing page está em
 ## Endpoints
 
 ### Músicas
+
+A interface permite listar, filtrar e gerenciar o catálogo diretamente:
+
+![ByteBeat — Catálogo e Busca](docs/screenshots/catalogo.png)
 
 | Método | Rota | Descrição |
 |---|---|---|
